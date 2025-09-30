@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CDN File Index</title>
+  <style>
+    body { font-family: sans-serif; background: #f5f5f5; padding: 20px; }
+    h1 { color: #333; }
+    ul { list-style: none; padding: 0; }
+    li { padding: 5px 0; }
+    a { text-decoration: none; color: #0366d6; }
+  </style>
+</head>
+<body>
+  <h1>CDN File Index</h1>
+  <ul id="file-list"></ul>
+
+  <script>
+    const user = "dgstufff";
+    const repo = "cdn";
+    const branch = "main"; // or "master"
+    const apiUrl = `https://api.github.com/repos/${user}/${repo}/git/trees/${branch}?recursive=1`;
+    const rawBase = `https://cdn.jsdelivr.net/gh/${user}/${repo}@${branch}/`;
+
+    fetch(apiUrl)
+      .then(res => res.json())
+      .then(data => {
+        const list = document.getElementById("file-list");
+        data.tree
+          .filter(file => file.type === "blob" && file.path !== "index.html")
+          .forEach(file => {
+            const li = document.createElement("li");
+            const a = document.createElement("a");
+            a.href = rawBase + file.path;
+            a.textContent = file.path;
+            li.appendChild(a);
+            list.appendChild(li);
+          });
+      })
+      .catch(err => {
+        document.body.innerHTML = "<p>Error loading file list. Make sure the repo is public.</p>";
+        console.error(err);
+      });
+  </script>
+</body>
+</html>
